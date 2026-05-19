@@ -39,16 +39,16 @@
         background: #1a1a1a;
         border: 1px solid #2a2a2a;
         border-radius: 8px;
-        animation: swipeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        animation: swipeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
     @keyframes swipeUp {
         from {
-            transform: translateY(100vh);
+            transform: translateY(100vh) rotate(90deg);
             opacity: 0;
         }
         to {
-            transform: translateY(0);
+            transform: translateY(0) rotate(0deg);
             opacity: 1;
         }
     }
