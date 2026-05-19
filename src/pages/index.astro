@@ -150,6 +150,7 @@
                         >
                     </button>
                 </div>
+                <div class="mouse-light"></div>
             </div>
         </div>
     </body>
@@ -209,6 +210,48 @@
 
     .card-back {
         display: none;
+    }
+
+    /* ── Mouse light: two sources, card hover only ── */
+    .mouse-light {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .card-inner:hover .mouse-light {
+        opacity: 1;
+    }
+
+    .mouse-light::before,
+    .mouse-light::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 8px;
+        pointer-events: none;
+    }
+
+    /* Direct: follows cursor */
+    .mouse-light::before {
+        background: radial-gradient(
+            circle at var(--mlx, 50%) var(--mly, 50%),
+            rgba(255, 255, 255, 0.015) 0%,
+            rgba(255, 255, 255, 0.005) 30%,
+            transparent 60%
+        );
+    }
+
+    /* Mirrored: opposite side of cursor */
+    .mouse-light::after {
+        background: radial-gradient(
+            circle at var(--mrx, 50%) var(--mry, 50%),
+            rgba(255, 255, 255, 0.012) 0%,
+            rgba(255, 255, 255, 0.004) 30%,
+            transparent 60%
+        );
     }
 
     /* ── Light reflections (front face only) ── */
@@ -417,6 +460,13 @@
     let velocityY = 0;
     let animating = false;
 
+    // ── Mouse light state (independent of tilt) ──
+    let mouseLightX = 0;
+    let mouseLightY = 0;
+    let mouseLightTargetX = 0;
+    let mouseLightTargetY = 0;
+    let mouseLightAnimating = false;
+
     const MAX_TILT = 25;
     const SENSITIVITY = 0.15;
     const STIFFNESS = 0.12;
@@ -427,10 +477,8 @@
         card.style.animation = "none";
     });
 
-    // ── Apply transform + lights ──
-    function applyTransform(rx: number, ry: number) {
-        cardInner.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
-
+    // ── Apply lights from tilt ──
+    function applyLights(rx: number, ry: number) {
         const lx1 = 30 - ry * 1.2;
         const ly1 = 30 + rx * 1.2;
         cardInner.style.setProperty("--lx1", `${lx1}%`);
@@ -440,6 +488,12 @@
         const ly2 = 70 - rx * 0.8;
         cardInner.style.setProperty("--lx2", `${lx2}%`);
         cardInner.style.setProperty("--ly2", `${ly2}%`);
+    }
+
+    // ── Apply transform + lights ──
+    function applyTransform(rx: number, ry: number) {
+        cardInner.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+        applyLights(rx, ry);
     }
 
     // ── Spring system ──
@@ -544,6 +598,56 @@
         isDragging = false;
         startSpring();
     }
+
+    // ── Mouse light: its own source, card hover only ──
+    const mouseLight = document.querySelector(".mouse-light") as HTMLElement;
+
+    function mouseLightTick() {
+        mouseLightX += (mouseLightTargetX - mouseLightX) * 0.15;
+        mouseLightY += (mouseLightTargetY - mouseLightY) * 0.15;
+
+        const done =
+            Math.abs(mouseLightX - mouseLightTargetX) < 0.01 &&
+            Math.abs(mouseLightY - mouseLightTargetY) < 0.01;
+
+        if (done) {
+            mouseLightX = mouseLightTargetX;
+            mouseLightY = mouseLightTargetY;
+        }
+
+        mouseLight.style.setProperty("--mlx", `${mouseLightX}%`);
+        mouseLight.style.setProperty("--mly", `${mouseLightY}%`);
+        mouseLight.style.setProperty("--mrx", `${100 - mouseLightX}%`);
+        mouseLight.style.setProperty("--mry", `${100 - mouseLightY}%`);
+
+        if (!done) {
+            requestAnimationFrame(mouseLightTick);
+        } else {
+            mouseLightAnimating = false;
+        }
+    }
+
+    function startMouseLightAnim() {
+        if (!mouseLightAnimating) {
+            mouseLightAnimating = true;
+            requestAnimationFrame(mouseLightTick);
+        }
+    }
+
+    card.addEventListener("mousemove", (e: MouseEvent) => {
+        const rect = card.getBoundingClientRect();
+        const nx = (e.clientX - rect.left) / rect.width;
+        const ny = (e.clientY - rect.top) / rect.height;
+        mouseLightTargetX = nx * 100;
+        mouseLightTargetY = ny * 100;
+        startMouseLightAnim();
+    });
+
+    card.addEventListener("mouseleave", () => {
+        mouseLightTargetX = 50;
+        mouseLightTargetY = 50;
+        startMouseLightAnim();
+    });
 
     body.addEventListener("mousedown", onStart);
     body.addEventListener("mousemove", onMove);
