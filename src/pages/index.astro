@@ -31,6 +31,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        perspective: 800px;
     }
 
     .card {
@@ -40,6 +41,7 @@
         border: 1px solid #2a2a2a;
         border-radius: 8px;
         animation: swipeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+        will-change: transform;
     }
 
     @keyframes swipeUp {
@@ -53,3 +55,77 @@
         }
     }
 </style>
+
+<script>
+    const card = document.querySelector(".card") as HTMLElement;
+    const body = document.body;
+
+    // Clear the entrance animation once it's done so JS can control transform
+    card.addEventListener("animationend", () => {
+        card.style.animation = "none";
+        card.style.transform = "rotateX(0) rotateY(0)";
+    });
+
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let currentRotateX = 0;
+    let currentRotateY = 0;
+
+    const MAX_TILT = 25;
+    const SENSITIVITY = 0.15;
+
+    function elasticClamp(value: number, max: number): number {
+        const sign = Math.sign(value);
+        const abs = Math.abs(value);
+        if (abs <= max) return value;
+        return sign * (max + (abs - max) * 0.15);
+    }
+
+    function setTilt(rx: number, ry: number, transition = false) {
+        if (transition) {
+            card.style.transition =
+                "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)";
+        } else {
+            card.style.transition = "none";
+        }
+        card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+        currentRotateX = rx;
+        currentRotateY = ry;
+    }
+
+    function onStart(e: MouseEvent | TouchEvent) {
+        if (e.target === card) return;
+        isDragging = true;
+        const point = "touches" in e ? e.touches[0] : e;
+        startX = point.clientX;
+        startY = point.clientY;
+    }
+
+    function onMove(e: MouseEvent | TouchEvent) {
+        if (!isDragging) return;
+        const point = "touches" in e ? e.touches[0] : e;
+        const dx = point.clientX - startX;
+        const dy = point.clientY - startY;
+
+        const rotateY = elasticClamp(dx * SENSITIVITY, MAX_TILT);
+        const rotateX = elasticClamp(-dy * SENSITIVITY, MAX_TILT);
+
+        setTilt(rotateX, rotateY);
+    }
+
+    function onEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        setTilt(0, 0, true);
+    }
+
+    body.addEventListener("mousedown", onStart);
+    body.addEventListener("mousemove", onMove);
+    body.addEventListener("mouseup", onEnd);
+    body.addEventListener("mouseleave", onEnd);
+
+    body.addEventListener("touchstart", onStart, { passive: true });
+    body.addEventListener("touchmove", onMove, { passive: true });
+    body.addEventListener("touchend", onEnd);
+</script>
