@@ -1,4 +1,4 @@
-# diss.vlyth.com
+# Digital Business Card
 
 An interactive 3D digital business card built with [Astro](https://astro.build). Features tilt physics, light reflections, mouse-tracking effects, and a flip animation — all in a single page.
 
@@ -10,8 +10,8 @@ An interactive 3D digital business card built with [Astro](https://astro.build).
 ## Quick start
 
 ```sh
-git clone https://github.com/vlyth-exe/diss.vlyth.com.git
-cd diss.vlyth.com
+git clone https://github.com/vlyth-exe/digital-business-card.git
+cd digital-business-card
 npm install
 npm run dev
 ```
