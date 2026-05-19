@@ -1,0 +1,28 @@
+{
+  "name": "Diss",
+  "role": "Developer",
+  "quip": "i make things go brrr",
+  "links": [
+    {
+      "label": "Email",
+      "url": "mailto:hello@diss.vlyth.com",
+      "icon": "lucide:mail"
+    },
+    {
+      "label": "GitHub",
+      "url": "https://github.com/diss",
+      "icon": "simple-icons:github"
+    },
+    {
+      "label": "Twitter",
+      "url": "https://x.com/diss",
+      "icon": "simple-icons:x"
+    },
+    {
+      "label": "Website",
+      "url": "https://vlyth.com",
+      "icon": "lucide:globe"
+    }
+  ],
+  "back": "I build things for the web and occasionally break them. Based somewhere between late-night commits and over-engineered side projects. If it compiles, ship it."
+}

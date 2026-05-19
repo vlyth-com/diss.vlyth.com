@@ -1,0 +1,83 @@
+---
+import { getIconData } from "@iconify/utils";
+import lucideIcons from "@iconify-json/lucide/icons.json";
+import simpleIcons from "@iconify-json/simple-icons/icons.json";
+
+interface Props {
+    icon: string;
+    url?: string;
+    size?: number;
+}
+
+const { icon, url, size = 14 } = Astro.props;
+
+const collections: Record<
+    string,
+    { prefix: string; icons: Record<string, { body: string }> }
+> = {
+    lucide: lucideIcons as never,
+    "simple-icons": simpleIcons as never,
+};
+
+// Try to load the icon from installed collections
+let iconBody: string | null = null;
+let iconViewBox = "0 0 24 24";
+
+if (icon.includes(":")) {
+    const [setName, iconName] = icon.split(":");
+    const collection = collections[setName];
+    if (collection && iconName) {
+        const data = getIconData(collection, iconName);
+        if (data) {
+            iconBody = data.body;
+            iconViewBox = `${data.left ?? 0} ${data.top ?? 0} ${data.width ?? 24} ${data.height ?? 24}`;
+        }
+    }
+}
+
+// Fallback: extract domain for Google favicon API
+let faviconSrc: string | null = null;
+if (!iconBody && url) {
+    try {
+        const parsed = new URL(
+            url.startsWith("mailto:") ? "https://mail.google.com" : url,
+        );
+        faviconSrc = `https://www.google.com/s2/favicons?domain=${parsed.hostname}&sz=${size * 2}`;
+    } catch {
+        faviconSrc = null;
+    }
+}
+---
+
+{
+    iconBody ? (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={size}
+            height={size}
+            viewBox={iconViewBox}
+            set:html={iconBody}
+        />
+    ) : faviconSrc ? (
+        <img
+            src={faviconSrc}
+            alt=""
+            width={size}
+            height={size}
+            class="favicon-fallback"
+        />
+    ) : (
+        <span
+            class="icon-missing"
+            style={`width:${size}px;height:${size}px;display:inline-block;`}
+        />
+    )
+}
+
+<style>
+    .favicon-fallback {
+        filter: grayscale(100%) brightness(0.6);
+        object-fit: contain;
+        border-radius: 2px;
+    }
+</style>
