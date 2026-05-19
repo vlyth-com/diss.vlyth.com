@@ -538,7 +538,29 @@
         return sign * (max + (abs - max) * 0.15);
     }
 
-    // ── Read current visual rotation from computed style ──
+    // ── Flip light animation ──
+    let flipLightRaf = 0;
+    let flipLightStart = 0;
+
+    function flipLightTick(phase: "out" | "in") {
+        return (timestamp: number) => {
+            if (!flipLightStart) flipLightStart = timestamp;
+            const elapsed = timestamp - flipLightStart;
+            const progress = Math.min(elapsed / 300, 1);
+
+            const effectiveRy =
+                phase === "out"
+                    ? tiltY + progress * 90
+                    : tiltY - 90 + progress * 90;
+
+            applyLights(tiltX, effectiveRy);
+
+            if (progress < 1) {
+                flipLightRaf = requestAnimationFrame(flipLightTick(phase));
+            }
+        };
+    }
+
     // ── Flip ──
     function flipCard() {
         if (flipTransitioning) return;
@@ -550,17 +572,29 @@
 
         outEl.style.animation = "flipOut 0.3s ease-in forwards";
 
+        // Animate lights during flip-out
+        cancelAnimationFrame(flipLightRaf);
+        flipLightStart = 0;
+        flipLightRaf = requestAnimationFrame(flipLightTick("out"));
+
         setTimeout(() => {
+            cancelAnimationFrame(flipLightRaf);
             outEl.style.display = "none";
             outEl.style.animation = "none";
 
             inEl.style.display = "block";
             inEl.style.animation = "flipIn 0.3s ease-out forwards";
+
+            // Animate lights during flip-in
+            flipLightStart = 0;
+            flipLightRaf = requestAnimationFrame(flipLightTick("in"));
         }, 300);
 
         setTimeout(() => {
+            cancelAnimationFrame(flipLightRaf);
             inEl.style.animation = "none";
             flipTransitioning = false;
+            applyLights(tiltX, tiltY);
         }, 620);
     }
 
