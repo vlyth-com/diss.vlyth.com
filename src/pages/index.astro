@@ -566,6 +566,7 @@
         if (flipTransitioning) return;
         flipped = !flipped;
         flipTransitioning = true;
+        mouseLight.style.opacity = "0";
 
         const outEl = flipped ? cardFront : cardBack;
         const inEl = flipped ? cardBack : cardFront;
@@ -595,6 +596,7 @@
             inEl.style.animation = "none";
             flipTransitioning = false;
             applyLights(tiltX, tiltY);
+            mouseLight.style.opacity = "";
         }, 620);
     }
 
