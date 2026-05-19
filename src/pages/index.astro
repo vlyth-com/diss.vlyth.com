@@ -42,6 +42,36 @@
         border-radius: 8px;
         animation: swipeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
         will-change: transform;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 8px;
+        background: radial-gradient(
+            circle at var(--lx1, 30%) var(--ly1, 30%),
+            rgba(255, 255, 255, 0.04) 0%,
+            rgba(255, 255, 255, 0.01) 40%,
+            transparent 70%
+        );
+        pointer-events: none;
+    }
+
+    .card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 8px;
+        background: radial-gradient(
+            circle at var(--lx2, 70%) var(--ly2, 70%),
+            rgba(255, 255, 255, 0.03) 0%,
+            rgba(255, 255, 255, 0.008) 40%,
+            transparent 70%
+        );
+        pointer-events: none;
     }
 
     @keyframes swipeUp {
@@ -69,11 +99,18 @@
     let isDragging = false;
     let startX = 0;
     let startY = 0;
-    let currentRotateX = 0;
-    let currentRotateY = 0;
+
+    // Spring state
+    let tiltX = 0;
+    let tiltY = 0;
+    let velocityX = 0;
+    let velocityY = 0;
+    let animating = false;
 
     const MAX_TILT = 25;
     const SENSITIVITY = 0.15;
+    const STIFFNESS = 0.12;
+    const DAMPING = 0.75;
 
     function elasticClamp(value: number, max: number): number {
         const sign = Math.sign(value);
@@ -82,21 +119,59 @@
         return sign * (max + (abs - max) * 0.15);
     }
 
-    function setTilt(rx: number, ry: number, transition = false) {
-        if (transition) {
-            card.style.transition =
-                "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)";
-        } else {
-            card.style.transition = "none";
-        }
+    function applyTilt(rx: number, ry: number) {
+        card.style.transition = "none";
         card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
-        currentRotateX = rx;
-        currentRotateY = ry;
+
+        // Two soft light sources shifting differently with tilt
+        const lx1 = 30 - ry * 1.2;
+        const ly1 = 30 + rx * 1.2;
+        card.style.setProperty("--lx1", `${lx1}%`);
+        card.style.setProperty("--ly1", `${ly1}%`);
+
+        const lx2 = 70 + ry * 0.8;
+        const ly2 = 70 - rx * 0.8;
+        card.style.setProperty("--lx2", `${lx2}%`);
+        card.style.setProperty("--ly2", `${ly2}%`);
+    }
+
+    function springTick() {
+        velocityX = (velocityX + (0 - tiltX) * STIFFNESS) * DAMPING;
+        velocityY = (velocityY + (0 - tiltY) * STIFFNESS) * DAMPING;
+        tiltX += velocityX;
+        tiltY += velocityY;
+
+        applyTilt(tiltX, tiltY);
+
+        if (
+            Math.abs(tiltX) < 0.01 &&
+            Math.abs(tiltY) < 0.01 &&
+            Math.abs(velocityX) < 0.01 &&
+            Math.abs(velocityY) < 0.01
+        ) {
+            tiltX = 0;
+            tiltY = 0;
+            velocityX = 0;
+            velocityY = 0;
+            applyTilt(0, 0);
+            animating = false;
+            return;
+        }
+
+        requestAnimationFrame(springTick);
+    }
+
+    function startSpring() {
+        velocityX = 0;
+        velocityY = 0;
+        animating = true;
+        requestAnimationFrame(springTick);
     }
 
     function onStart(e: MouseEvent | TouchEvent) {
         if (e.target === card) return;
         isDragging = true;
+        animating = false;
         const point = "touches" in e ? e.touches[0] : e;
         startX = point.clientX;
         startY = point.clientY;
@@ -108,16 +183,16 @@
         const dx = point.clientX - startX;
         const dy = point.clientY - startY;
 
-        const rotateY = elasticClamp(dx * SENSITIVITY, MAX_TILT);
-        const rotateX = elasticClamp(-dy * SENSITIVITY, MAX_TILT);
+        tiltY = elasticClamp(dx * SENSITIVITY, MAX_TILT);
+        tiltX = elasticClamp(-dy * SENSITIVITY, MAX_TILT);
 
-        setTilt(rotateX, rotateY);
+        applyTilt(tiltX, tiltY);
     }
 
     function onEnd() {
         if (!isDragging) return;
         isDragging = false;
-        setTilt(0, 0, true);
+        startSpring();
     }
 
     body.addEventListener("mousedown", onStart);
