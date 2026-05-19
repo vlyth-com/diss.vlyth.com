@@ -45,6 +45,10 @@ import Icon from "../components/Icon.astro";
                     <button class="flip-btn" aria-label="Flip card">
                         <Icon icon="lucide:refresh-cw" />
                     </button>
+                    <div class="flip-hint">
+                        <span class="flip-hint-text">flip for more info</span>
+                        <span class="flip-hint-arrow">→</span>
+                    </div>
                 </div>
                 <div class="card-back">
                     <div class="back-content">
@@ -314,6 +318,64 @@ import Icon from "../components/Icon.astro";
         color: #e8e8e8;
     }
 
+    /* ── Flip hint ── */
+    .flip-hint {
+        position: absolute;
+        bottom: 12px;
+        right: 44px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #555;
+        font-size: 0.72rem;
+        letter-spacing: 0.03em;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .flip-hint.visible {
+        opacity: 1;
+        animation: hintPulse 2s ease-in-out infinite;
+    }
+
+    .flip-hint.visible .flip-hint-arrow {
+        animation: hintBounce 1.5s ease-in-out infinite;
+    }
+
+    .flip-hint.hidden {
+        opacity: 0;
+    }
+
+    .flip-hint-text {
+        white-space: nowrap;
+    }
+
+    .flip-hint-arrow {
+        font-size: 0.85rem;
+    }
+
+    @keyframes hintPulse {
+        0%,
+        100% {
+            color: #555;
+        }
+        50% {
+            color: #888;
+        }
+    }
+
+    @keyframes hintBounce {
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+        50% {
+            transform: translateX(3px);
+        }
+    }
+
     /* ── Entrance ── */
     @keyframes swipeUp {
         from {
@@ -465,6 +527,22 @@ import Icon from "../components/Icon.astro";
         };
     }
 
+    // ── Flip hint ──
+    const flipHint = document.querySelector(".flip-hint") as HTMLElement | null;
+    let hintDismissed = false;
+    let hintTimeout = setTimeout(() => {
+        if (flipHint && !hintDismissed) flipHint.classList.add("visible");
+    }, 10000);
+
+    function dismissHint() {
+        if (hintDismissed || !flipHint) return;
+        hintDismissed = true;
+        clearTimeout(hintTimeout);
+        flipHint.classList.remove("visible");
+        flipHint.classList.add("hidden");
+        setTimeout(() => flipHint.remove(), 400);
+    }
+
     // ── Flip ──
     function flipCard() {
         if (flipTransitioning) return;
@@ -507,6 +585,7 @@ import Icon from "../components/Icon.astro";
     document.querySelectorAll(".flip-btn").forEach((btn) => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
+            dismissHint();
             flipCard();
         });
     });
