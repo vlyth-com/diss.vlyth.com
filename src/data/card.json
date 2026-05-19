@@ -1,7 +1,7 @@
 {
-  "name": "Diss",
-  "role": "Developer",
-  "quip": "i make things go brrr",
+  "name": "Vlyth",
+  "role": "Cyber Security Student",
+  "quip": "Open for work in cyber security and software development.",
   "links": [
     {
       "label": "Email",
@@ -24,5 +24,5 @@
       "icon": "lucide:globe"
     }
   ],
-  "back": "I build things for the web and occasionally break them. Based somewhere between late-night commits and over-engineered side projects. If it compiles, ship it."
+  "back": "Final year Cyber Security & Digital Forensics student (expecting First-Class Honours). Building things, breaking things, learning constantly."
 }
