@@ -1,0 +1,1 @@
+Hi, I'm Vlyth (Adam), a Cyber Security student with a passion for software development. I built this digital business card as a quick way to share my details at the showcase — which I hope you're enjoying. Outside of tech, I spend most of my time bouldering and playing ice hockey.

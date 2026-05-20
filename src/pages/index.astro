@@ -1,5 +1,6 @@
 ---
 import card from "../data/card.json";
+import Back from "../data/back.md";
 import Icon from "../components/Icon.astro";
 ---
 
@@ -52,7 +53,7 @@ import Icon from "../components/Icon.astro";
                 </div>
                 <div class="card-back">
                     <div class="back-content">
-                        <p>{card.back}</p>
+                        <Back />
                     </div>
                     <button class="flip-btn" aria-label="Flip card back">
                         <Icon icon="lucide:refresh-cw" />
@@ -288,13 +289,23 @@ import Icon from "../components/Icon.astro";
         z-index: 1;
     }
 
-    .back-content p {
+    .card-back p {
         font-size: 0.7rem;
         color: #888;
         line-height: 1.6;
         text-align: center;
         user-select: text;
         -webkit-user-select: text;
+    }
+
+    .card-back a {
+        color: #666;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .card-back a:hover {
+        color: #e8e8e8;
     }
 
     /* ── Flip button ── */
