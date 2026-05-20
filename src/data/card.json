@@ -9,9 +9,10 @@
       "icon": "lucide:mail"
     },
     {
-      "label": "Read Full Disseratation"
-      "url": ""
+      "label": "Read Full Dissertation",
+      "url": "/dissertation.pdf",
       "icon": "lucide:file-text"
+    },
     {
       "label": "GitHub",
       "url": "https://github.com/vlyth-exe",
@@ -21,7 +22,7 @@
       "label": "LinkedIn",
       "url": "https://linkedin.com/in/adamwherrett",
       "icon": "simple-icons:linkedin"
-    },
+    }
   ],
-  "back": "Hi I'm Vlyth (Adam) and this is mt digital bussiness card. From here you have access to a few links I think you might like to visit."
+  "back": "Hi I'm Vlyth (Adam) and this is my digital business card. From here you have access to a few links I think you might like to visit."
 }
