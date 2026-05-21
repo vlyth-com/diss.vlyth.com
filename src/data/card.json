@@ -4,9 +4,9 @@
   "quip": "Open for work in cyber security and software development.",
   "links": [
     {
-      "label": "wherrett.a@proton.me",
-      "url": "mailto:wherrett.a@proton.me",
-      "icon": "lucide:mail"
+      "label": "View Poster",
+      "url": "/poster.pdf",
+      "icon": "lucide:image"
     },
     {
       "label": "Read Full Dissertation",
@@ -14,14 +14,19 @@
       "icon": "lucide:file-text"
     },
     {
+      "label": "wherrett.a@proton.me",
+      "url": "mailto:wherrett.a@proton.me",
+      "icon": "lucide:mail"
+    },
+    {
       "label": "GitHub",
       "url": "https://github.com/vlyth-exe",
       "icon": "simple-icons:github"
     },
-      {
-        "label": "LinkedIn",
-        "url": "https://linkedin.com/in/adamwherrett",
-        "icon": "simple-icons:linkedin"
-      }
+    {
+      "label": "LinkedIn",
+      "url": "https://linkedin.com/in/adamwherrett",
+      "icon": "simple-icons:linkedin"
+    }
   ]
 }
